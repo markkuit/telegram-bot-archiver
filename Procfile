@@ -1,1 +1,1 @@
-app: make run
+app: mkdir -p /app/tmp && make run

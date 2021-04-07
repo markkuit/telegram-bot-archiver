@@ -129,6 +129,7 @@ func ExtractFile(message *tgbotapi.Message) {
 	}
 
 	filePath := filepath.Join(commons.Config.TempPath, strconv.Itoa(int(message.Chat.ID))+message.Document.FileName)
+	telegram.SendMessage(telegram.Message{ChatID: message.Chat.ID, Text: i18n.DownloadingFile})
 	if err := util.DownloadFile(filePath, directURL); err != nil {
 		telegram.SendMessage(telegram.Message{ChatID: message.Chat.ID, Text: fmt.Sprintf("%s: %s", i18n.ErrorDownloadFileFailed, err.Error())})
 		return

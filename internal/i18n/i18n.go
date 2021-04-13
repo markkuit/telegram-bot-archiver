@@ -22,9 +22,11 @@ Get in touch if you need help. Enjoy!
 	CompressProcessedFile        = "File has been processed"
 	CompressSendFiles            = "Session active. Send files to be compressed. Type `/compressdone` when finished."
 
-	ExtractChooseFiles  = "Now listing suitable archive files; go ahead and choose."
-	ExtractNoValidFiles = "No suitable files could be find in the provided archive."
-	ExtractSendArchive  = "Session active. Send archive to be extracted."
+	ExtractChooseFiles             = "Now listing suitable archive files; go ahead and choose."
+	ExtractMaxInlineButtonsReached = "NOTE: the maximum number of listable files has been reached, listing will be partial. Get all files if necessary."
+	ExtractMaxFilesReached         = "NOTE: the maximum number of files to massively get has been reached."
+	ExtractNoValidFiles            = "No suitable files could be find in the provided archive."
+	ExtractSendArchive             = "Session active. Send archive to be extracted."
 
 	ErrorArchiveWalkFailed         = "Error while iterating through archive files"
 	ErrorArgumentMissing           = "Argument missing. Type `/start` for help."

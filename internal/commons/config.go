@@ -12,6 +12,8 @@ import (
 type botConfig struct {
 	APIToken             string
 	MaxContentLength     int64
+	MaxExtractFiles      int
+	MaxInlineButtons     int
 	MaxSingleFileSize    int64
 	InlineButtonsRowSize int
 	TempPath             string
@@ -23,6 +25,8 @@ var Config botConfig
 func init() {
 	Config.APIToken = getenv("API_TOKEN", true)
 	Config.MaxContentLength = parseBytes(getenv("MAX_CONTENT_LENGTH", true))
+	Config.MaxExtractFiles, _ = strconv.Atoi(getenv("MAX_EXTRACT_FILES", true))
+	Config.MaxInlineButtons, _ = strconv.Atoi(getenv("MAX_INLINE_BUTTONS", true))
 	Config.MaxSingleFileSize = parseBytes(getenv("MAX_SINGLE_FILE_SIZE", true))
 	Config.InlineButtonsRowSize, _ = strconv.Atoi(getenv("INLINE_BUTTONS_ROW_SIZE", true))
 	Config.TempPath = getenv("TEMP_PATH", true)

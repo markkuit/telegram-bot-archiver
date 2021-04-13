@@ -15,6 +15,8 @@ The project includes quick start templates for running standalone, on Docker and
 | - | - |
 | API_TOKEN | Telegram Bot API unique authentication token |
 | MAX_CONTENT_LENGTH | Maximum content length for file downloads |
+| MAX_EXTRACT_FILES | Maximum number of files to give out for bulk get requests |
+| MAX_INLINE_BUTTONS | Maximum number of buttons for markup keyboards |
 | MAX_SINGLE_FILE_SIZE | Maximum file size to be handled, both for downloads and uploads |
 | INLINE_BUTTONS_ROW_SIZE | Maximum number of choice buttons to put in a single row in markup keyboards |
 | TEMP_PATH | Temporary path for session files storage |

@@ -23,8 +23,10 @@ import (
 )
 
 // buildCallbackRows builds slices of buttons based on a list of archive files
-func buildCallbackRows(archiveFiles map[int]archiver.File) ([][]tgbotapi.InlineKeyboardButton, error) {
+func buildCallbackRows(archiveFiles map[int]archiver.File) ([][]tgbotapi.InlineKeyboardButton, bool, error) {
 	var callbackButtons []tgbotapi.InlineKeyboardButton
+	var maxInlineButtonsReached bool
+
 	for k, v := range archiveFiles {
 		if v.Mode().IsRegular() && v.Size() > 0 {
 			callback := callback.Callback{
@@ -33,7 +35,7 @@ func buildCallbackRows(archiveFiles map[int]archiver.File) ([][]tgbotapi.InlineK
 			}
 			callbackMarshal, err := json.Marshal(callback)
 			if err != nil {
-				return [][]tgbotapi.InlineKeyboardButton{}, err
+				return [][]tgbotapi.InlineKeyboardButton{}, false, err
 			}
 
 			// not all formats support getting the full path, thus having to check by the header
@@ -49,6 +51,10 @@ func buildCallbackRows(archiveFiles map[int]archiver.File) ([][]tgbotapi.InlineK
 				fileName = v.Name()
 			}
 
+			if len(callbackButtons) >= commons.Config.MaxInlineButtons {
+				maxInlineButtonsReached = true
+				break
+			}
 			callbackButtons = append(callbackButtons, tgbotapi.NewInlineKeyboardButtonData(
 				fmt.Sprintf("%s (%s)", fileName, humanize.Bytes(uint64(v.Size()))),
 				string(callbackMarshal),
@@ -68,7 +74,7 @@ func buildCallbackRows(archiveFiles map[int]archiver.File) ([][]tgbotapi.InlineK
 		rows = append(rows, tgbotapi.NewInlineKeyboardRow(callbackButtons[i:end]...))
 	}
 
-	return rows, nil
+	return rows, maxInlineButtonsReached, nil
 }
 
 // buildExtract builds the actual session buttons to let the user choose
@@ -79,7 +85,7 @@ func buildExtract(filePath, sessionAction string, message *tgbotapi.Message) {
 		telegram.SendMessage(telegram.Message{ChatID: message.Chat.ID, Text: fmt.Sprintf("%s: %s", i18n.ErrorArchiveWalkFailed, err.Error())})
 		return
 	}
-	inlineRows, err := buildCallbackRows(archiveFiles)
+	inlineRows, maxInlineButtonsReached, err := buildCallbackRows(archiveFiles)
 	if err != nil {
 		log.Fatalf("buildExtract: buildCallbackRows: %s\n", err)
 	}
@@ -113,6 +119,10 @@ func buildExtract(filePath, sessionAction string, message *tgbotapi.Message) {
 		inlineKeyboard := tgbotapi.NewInlineKeyboardMarkup(inlineRows...)
 
 		telegram.SendMessage(telegram.Message{ChatID: message.Chat.ID, Text: i18n.ExtractChooseFiles, KeyboardMarkup: inlineKeyboard})
+		if maxInlineButtonsReached {
+			telegram.SendMessage(telegram.Message{ChatID: message.Chat.ID, Text: i18n.ExtractMaxInlineButtonsReached})
+		}
+
 		session.New(message.Chat.ID, sessionAction, filePath)
 	} else {
 		telegram.SendMessage(telegram.Message{ChatID: message.Chat.ID, Text: i18n.ExtractNoValidFiles})
@@ -168,6 +178,10 @@ func ExtractChoose(callbackQuery *tgbotapi.CallbackQuery, callbackData callback.
 	i := 0
 	err := archiver.Walk(session.ActionFile, func(f archiver.File) error {
 		if (callbackData.HasIndex(i) || callbackData.HasFlag(callback.FlagWildcard)) && f.Size() <= commons.Config.MaxSingleFileSize && f.Size() > 0 {
+			if i == commons.Config.MaxExtractFiles {
+				telegram.SendMessage(telegram.Message{ChatID: callbackQuery.Message.Chat.ID, Text: i18n.ExtractMaxFilesReached})
+				return archiver.ErrStopWalk
+			}
 			telegram.SendMessage(telegram.Message{ChatID: callbackQuery.Message.Chat.ID, Text: i18n.SendingFile})
 			if err := telegram.SendFile(callbackQuery.Message.Chat.ID, tgbotapi.FileReader{Name: f.Name(), Size: f.Size(), Reader: f.ReadCloser}); err != nil {
 				log.Printf("ExtractChoose: SendFile: %s\n", err)

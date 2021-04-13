@@ -23,10 +23,8 @@ import (
 )
 
 // buildCallbackRows builds slices of buttons based on a list of archive files
-func buildCallbackRows(archiveFiles map[int]archiver.File) ([][]tgbotapi.InlineKeyboardButton, bool, error) {
+func buildCallbackRows(archiveFiles map[int]archiver.File) (rows [][]tgbotapi.InlineKeyboardButton, maxInlineButtonsReached bool, err error) {
 	var callbackButtons []tgbotapi.InlineKeyboardButton
-	var maxInlineButtonsReached bool
-
 	for k, v := range archiveFiles {
 		if v.Mode().IsRegular() && v.Size() > 0 {
 			callback := callback.Callback{
@@ -63,7 +61,6 @@ func buildCallbackRows(archiveFiles map[int]archiver.File) ([][]tgbotapi.InlineK
 	}
 
 	// ref. https://stackoverflow.com/a/35179941
-	var rows [][]tgbotapi.InlineKeyboardButton
 	for i := 0; i < len(callbackButtons); i += commons.Config.InlineButtonsRowSize {
 		end := i + commons.Config.InlineButtonsRowSize
 

@@ -145,7 +145,7 @@ func ExtractFile(message *tgbotapi.Message) {
 	buildExtract(filePath, "extractfile", message)
 }
 
-// ExtractFile handles the extraction of specific archive files or all of them, upon
+// ExtractURL handles the extraction of specific archive files or all of them, upon
 // download of the archive itself from a common URL
 func ExtractURL(message *tgbotapi.Message) {
 	srcURL, err := url.Parse(message.CommandArguments())
